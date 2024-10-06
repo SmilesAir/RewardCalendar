@@ -13,8 +13,6 @@
         "@fullcalendar/core": "^6.1.15",
         "@fullcalendar/daygrid": "^6.1.15",
         "@fullcalendar/react": "^6.1.15",
-        "google-auth-library": "^9.14.1",
-        "google-spreadsheet": "^4.1.4",
         "mobx": "^6.13.3",
         "mobx-react": "^9.1.1",
         "react": "^18.3.1",

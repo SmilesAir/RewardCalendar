@@ -10,5 +10,8 @@ export default defineConfig({
   ],
   optimizeDeps: {
     exclude: ["google-auth-library"]
-  }
+  },
+  define: {
+    "process.browser": true,
+  },
 })

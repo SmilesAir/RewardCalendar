@@ -8,40 +8,33 @@ provider:
   stage: ${opt:stage, "development"}
 
   environment:
-    TEST_TABLE: ${self:service}-${self:provider.stage}-testTable
 
   iamRoleStatements:
-    - Effect: Allow
-      Action:
-        - dynamodb:Scan
-        - dynamodb:GetItem
-        - dynamodb:PutItem
-        - dynamodb:UpdateItem
-        - dynamodb:DeleteItem
-      Resource: "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.TEST_TABLE}"
+
 
 functions:
-  testLambda:
-    handler: source/test.handler
+  getData:
+    handler: source/handlers.getData
     events:
       - http:
-          path: handler
+          path: getData
+          method: get
+          cors: true
+  setDiffFeel:
+    handler: source/handlers.setDiffFeel
+    events:
+      - http:
+          path: setDiffFeel/{rowIndex}/feel/{feel}
+          method: post
+          cors: true
+  setCompleted:
+    handler: source/handlers.setCompleted
+    events:
+      - http:
+          path: setCompleted/{rowIndex}/completed/{completed}
           method: post
           cors: true
 
-resources:
-  Resources:
-    dataTable:
-      Type: AWS::DynamoDB::Table
-      Properties:
-        BillingMode: PAY_PER_REQUEST
-        TableName: ${self:provider.environment.DATA_TABLE}
-        AttributeDefinitions:
-          - AttributeName: key
-            AttributeType: S
-        KeySchema:
-          - AttributeName: key
-            KeyType: HASH
 
 plugins:
   - fullstack-serverless
@@ -50,5 +43,5 @@ plugins:
 custom:
   fullstack:
     bucketName: deployed-bucket
-    distributionFolder: ../client/builds/web
+    distributionFolder: ../client/dist
     indexDocument: index.html

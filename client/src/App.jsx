@@ -2,9 +2,6 @@
 import React, { useEffect } from "react"
 import { observer } from "mobx-react"
 import { observable, runInAction } from "mobx"
-import { JWT } from "google-auth-library"
-import { GoogleSpreadsheet } from "google-spreadsheet"
-import creds from "./rewardcalendar-7a8682094cf6.json"
 import "./App.css"
 
 const mainStore = require("./mainStore.js")
@@ -12,38 +9,53 @@ const Summary = require("./summary.jsx")
 const Challenge = require("./challenge.jsx")
 const Calendar = require("./calendar.jsx")
 
-// if (import.meta.hot) {
-//     import.meta.hot.on(
-//       "vite:beforeUpdate",
-//       () => console.clear()
-//     );
-// }
+if (import.meta.hot) {
+    import.meta.hot.on(
+      "vite:beforeUpdate",
+      () => console.clear()
+    );
+}
 
-const SCOPES = [
-    'https://www.googleapis.com/auth/spreadsheets',
-    'https://www.googleapis.com/auth/drive.file',
-]
+const awsPath = "https://5kuebmbbmg.execute-api.us-west-2.amazonaws.com/production/"
 
-console.log("hey2")
+function postData(url, data) {
+    return fetch(url, {
+        method: "POST",
+        mode: "cors",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(data)
+    }).then((response) => {
+        return response.json()
+    }).catch((error) => {
+        console.error(error)
+    })
+}
+
+function getData(url) {
+    return fetch(url, {
+        method: "GET",
+        mode: "cors",
+        headers: {
+            "Content-Type": "application/json"
+        }
+    }).then((response) => {
+        return response.json()
+    }).catch((error) => {
+        console.error(error)
+    })
+}
 
 const App = observer(class App extends React.Component {
     constructor() {
         super()
 
-        console.log("hey")
-
-        setTimeout(async () => {
-            const jwt = new JWT({
-                email: creds.client_email,
-                key: creds.private_key,
-                scopes: SCOPES,
-            });
-            console.log(jwt)
-            const doc = new GoogleSpreadsheet("1M4c7w9iB15oHFFnzW6y8kURmcc-zO2sXbi4dbr3TB_E", jwt)
-
-            await doc.loadInfo()
-            console.log(doc.title)
-        }, 1)
+        getData(`${awsPath}getData`).then((resp) => {
+            runInAction(() => {
+                console.log(resp)
+            })
+        })
 
         // Can only be used for read
         // let id = "1M4c7w9iB15oHFFnzW6y8kURmcc-zO2sXbi4dbr3TB_E"
@@ -88,11 +100,22 @@ const App = observer(class App extends React.Component {
         }
     }
 
+    onTest() {
+        postData(`${awsPath}setDiffFeel/${10}/feel/${3}`, undefined).catch((error) => {
+            console.error(error)
+        })
+
+        postData(`${awsPath}setCompleted/${10}/completed/${1}`, undefined).catch((error) => {
+            console.error(error)
+        })
+    }
+
     render() {
         return (
             <div className="topContainer">
                 <h2>{mainStore.name}</h2>
                 <div className="contentContainer">
+                    <button onClick={() => this.onTest()}>test</button>
                     <Summary/>
                     <Challenge/>
                     <Calendar/>
