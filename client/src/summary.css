@@ -1,0 +1,19 @@
+
+.meter {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding: 3px;
+
+    .barsContainer {
+        border: 2px solid;
+        flex-grow: 1;
+
+        .meterBar {
+            color: gray;
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+        }
+    }
+}
