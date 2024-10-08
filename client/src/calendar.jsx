@@ -9,19 +9,32 @@ import "./calendar.css"
 
 const mainStore = require("./mainStore.js")
 
+const Calendar = observer(class Calendar extends React.Component {
+    constructor(props) {
+        super(props)
 
-const Summary = observer(class Summary extends React.Component {
-    constructor() {
-        super()
+        props.onDataReadyDelegate.push(() => this.onDataReady())
 
         this.state = {
             events: [{ title: 'Scarecrow', start: new Date() }]
         }
     }
 
+    onDataReady() {
+        this.setState()
+    }
+
+    onClickEvent(event) {
+        runInAction(() => {
+            mainStore.selectedChallenge = event.extendedProps.googleDate
+        })
+
+        console.log(mainStore.selectedChallenge)
+    }
+
     renderEventContent(eventInfo) {
         return (
-          <div>
+          <div className="event" onClick={() => this.onClickEvent(eventInfo.event)}>
             <div>{eventInfo.event.title}</div>
           </div>
         )
@@ -29,12 +42,12 @@ const Summary = observer(class Summary extends React.Component {
 
     render() {
         return (
-            <div className="contentBase">
+            <div className="contentBase calendar">
                 <FullCalendar
                     plugins={[dayGridPlugin]}
                     initialView="dayGridMonth"
                     weekends={true}
-                    events={this.state.events}
+                    events={mainStore.data}
                     eventContent={(eventInfo) => this.renderEventContent(eventInfo)}
                 />
             </div>
@@ -42,4 +55,4 @@ const Summary = observer(class Summary extends React.Component {
     }
 })
 
-export default Summary
+export default Calendar

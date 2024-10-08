@@ -8,6 +8,7 @@ const mainStore = require("./mainStore.js")
 const Summary = require("./summary.jsx")
 const Challenge = require("./challenge.jsx")
 const Calendar = require("./calendar.jsx")
+const {googleDateToDate, getTodayGoogleDate, getData} = require("./utils.js")
 
 if (import.meta.hot) {
     import.meta.hot.on(
@@ -16,44 +17,17 @@ if (import.meta.hot) {
     );
 }
 
-const awsPath = "https://5kuebmbbmg.execute-api.us-west-2.amazonaws.com/production/"
-
-function postData(url, data) {
-    return fetch(url, {
-        method: "POST",
-        mode: "cors",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify(data)
-    }).then((response) => {
-        return response.json()
-    }).catch((error) => {
-        console.error(error)
-    })
-}
-
-function getData(url) {
-    return fetch(url, {
-        method: "GET",
-        mode: "cors",
-        headers: {
-            "Content-Type": "application/json"
-        }
-    }).then((response) => {
-        return response.json()
-    }).catch((error) => {
-        console.error(error)
-    })
-}
-
 const App = observer(class App extends React.Component {
     constructor() {
         super()
 
-        getData(`${awsPath}getData`).then((resp) => {
+        this.onDataReady = []
+
+        getData(`getData`).then((resp) => {
             runInAction(() => {
-                console.log(resp)
+                //console.log(resp)
+
+                this.fillDataFromGoogleSheet(resp.cellData)
             })
         })
 
@@ -68,6 +42,36 @@ const App = observer(class App extends React.Component {
 
         //         console.log(JSON.parse(JSON.stringify(mainStore)))
         //     })
+    }
+
+    fillDataFromGoogleSheet(cellData) {
+        mainStore.name = cellData[0][1]
+        mainStore.cellData = cellData
+        mainStore.data = []
+
+        for (let i = 3; i < cellData.length; ++i) {
+            let googleDate = cellData[i][0]
+            if (googleDate > getTodayGoogleDate()) {
+                break
+            }
+
+            mainStore.data.push({
+                start: googleDateToDate(googleDate),
+                googleDate: googleDate,
+                title: cellData[i][1],
+                targetDiff: cellData[i][2],
+                video: cellData[i][3],
+                diffFeel: cellData[i][4],
+                completed: cellData[i][5],
+                googleSheetRowIndex: i + 1
+            })
+        }
+
+        console.log(JSON.parse(JSON.stringify(mainStore.data)))
+
+        for (let func of this.onDataReady) {
+            func()
+        }
     }
 
     // Only used for read only
@@ -100,25 +104,14 @@ const App = observer(class App extends React.Component {
         }
     }
 
-    onTest() {
-        postData(`${awsPath}setDiffFeel/${10}/feel/${3}`, undefined).catch((error) => {
-            console.error(error)
-        })
-
-        postData(`${awsPath}setCompleted/${10}/completed/${1}`, undefined).catch((error) => {
-            console.error(error)
-        })
-    }
-
     render() {
         return (
             <div className="topContainer">
                 <h2>{mainStore.name}</h2>
                 <div className="contentContainer">
-                    <button onClick={() => this.onTest()}>test</button>
-                    <Summary/>
-                    <Challenge/>
-                    <Calendar/>
+                    <Summary onDataReadyDelegate={this.onDataReady}/>
+                    <Challenge onDataReadyDelegate={this.onDataReady}/>
+                    <Calendar onDataReadyDelegate={this.onDataReady}/>
                 </div>
             </div>
         )

@@ -5,22 +5,45 @@ import { observable, runInAction } from "mobx"
 import "./challenge.css"
 
 const mainStore = require("./mainStore.js")
+const {getTodayGoogleDate, pad, postData, getChallengeData} = require("./utils.js")
 
+const Challenge = observer(class Challenge extends React.Component {
+    constructor(props) {
+        super(props)
 
-const Summary = observer(class Summary extends React.Component {
-    constructor() {
-        super()
+        props.onDataReadyDelegate.push(() => this.onDataReady())
+
+        setInterval(() => {
+            this.setState({})
+        }, 1000)
+    }
+
+    onDataReady() {
+        mainStore.selectedChallenge = getTodayGoogleDate()
     }
 
     getTimer() {
+        let start = new Date()
+        start.setHours(23, 59, 59)
+        let now = new Date()
+        if (now > start) {
+            start.setDate(start.getDate() + 1)
+        }
+        let remain = (start - now) / 1000
+        let hours = pad((remain / 60 / 60) % 60)
+        let minutes = pad((remain / 60) % 60)
+        let seconds = pad(remain % 60)
+
         return (
-            <div>12:45:32</div>
+            <div>{`Time Remaining: ${hours}:${minutes}:${seconds}`}</div>
         )
     }
 
     getMove() {
+        let challengeData = getChallengeData()
+        let move = challengeData !== undefined ? challengeData.title : "No Challenge Selected"
         return (
-            <div className="move">Scarecrow</div>
+            <div className="move">{move}</div>
         )
     }
 
@@ -32,11 +55,39 @@ const Summary = observer(class Summary extends React.Component {
         )
     }
 
+    onCompletedChanged() {
+        runInAction(() => {
+            let challengeData = getChallengeData()
+            challengeData.completed = !challengeData.completed
+
+            postData(`setCompleted/${challengeData.googleSheetRowIndex}/completed/${challengeData.completed ? 1 : 0}`, undefined).catch((error) => {
+                console.error(error)
+            })
+        })
+    }
+
+    onStarClick(stars) {
+        runInAction(() => {
+            let challengeData = getChallengeData()
+            if (stars === challengeData.diffFeel) {
+                challengeData.diffFeel = 0
+            } else {
+                challengeData.diffFeel = stars
+            }
+
+            postData(`setDiffFeel/${challengeData.googleSheetRowIndex}/feel/${challengeData.diffFeel}`, undefined).catch((error) => {
+                console.error(error)
+            })
+        })
+    }
+
     getFeedback() {
+        let challengeData = getChallengeData()
         let stars = []
         for (let i = 0; i < 5; ++i) {
+            let selected = i < challengeData.diffFeel
             stars.push(
-                <div key={i} className="star">{i + 1}</div>
+                <div key={i} className={`star ${selected ? "starSelected" : ""}`} onClick={() => this.onStarClick(i + 1)}>{i + 1}</div>
             )
         }
         return (
@@ -49,7 +100,7 @@ const Summary = observer(class Summary extends React.Component {
                 </div>
                 <div className="completionContainer">
                     <div className="completed">Completed?</div>
-                    <input type="checkbox"/>
+                    <input type="checkbox" checked={challengeData.completed} onChange={() => this.onCompletedChanged()}/>
                 </div>
             </div>
         )
@@ -70,4 +121,4 @@ const Summary = observer(class Summary extends React.Component {
     }
 })
 
-export default Summary
+export default Challenge

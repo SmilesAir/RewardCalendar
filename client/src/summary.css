@@ -1,12 +1,21 @@
 
+.streakValues {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    font-size: 2em;
+}
+
 .meter {
     display: flex;
     flex-direction: row;
     align-items: center;
     padding: 3px;
+    font-size: 1.25em;
 
     .barsContainer {
         border: 2px solid;
+        border-radius: 5px;
         flex-grow: 1;
 
         .meterBar {
@@ -14,6 +23,9 @@
             display: flex;
             flex-direction: row;
             justify-content: center;
+            border: 2px solid;
+            border-color: gray;
+            border-radius: 3px;
         }
     }
 }
