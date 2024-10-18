@@ -10,7 +10,10 @@ provider:
   environment:
 
   iamRoleStatements:
-
+    - Effect: Allow
+      Action:
+        - secretsmanager:GetSecretValue
+      Resource: "arn:aws:secretsmanager:us-west-2:855556937201:secret:reward-calendar/google-sheet-HBteqY"
 
 functions:
   getData:
