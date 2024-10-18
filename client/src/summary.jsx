@@ -35,7 +35,7 @@ const Summary = observer(class Summary extends React.Component {
             ret.totalAttemps += attempted ? 1 : 0
             ret.totalCompletions += completed ? 1 : 0
             if (attempsStreakAlive) {
-                if (attempted || completed) {
+                if (attempted) {
                     ++ret.attemptsStreak
                 }
                 else if (todayIndex !== i) {
@@ -57,16 +57,15 @@ const Summary = observer(class Summary extends React.Component {
 
     getMeter() {
         let meter = []
-        let summaryData = this.getSummaryData()
         const maxBarCount = 10
-        let bars = summaryData.attemptsStreak % (maxBarCount + 1)
+        let bars = mainStore.heinMeterCount
         for (let i = 0; i < maxBarCount; ++i) {
             let barStyle = {
             }
             if (i < bars) {
                 barStyle.backgroundColor = "gold",
-                barStyle["border-color"] = "lightsalmon"
-                barStyle["font-weight"] = "bold"
+                barStyle.borderColor = "lightsalmon"
+                barStyle.fontWeight = "bold"
                 barStyle.color = "black"
             }
             meter.push(
@@ -95,20 +94,20 @@ const Summary = observer(class Summary extends React.Component {
         let summaryData = this.getSummaryData()
 
         return (
-            <div className="contentBase">
-                <table>
+            <div className="contentBase summaryContainer">
+                <table className="statsContainer">
                     <thead>
                         <tr>
                             <th>Attempts Streak</th>
                             <th>Completions Streak</th>
-                            <th>Total Attemps/Completions</th>
+                            <th>Total Completions/Attempts</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr>
                             <td><div className="streakValues">{summaryData.attemptsStreak}</div></td>
                             <td><div className="streakValues">{summaryData.completionsStreak}</div></td>
-                            <td><div className="streakValues">{summaryData.totalAttemps}/{summaryData.totalCompletions}</div></td>
+                            <td><div className="streakValues">{summaryData.totalCompletions}/{summaryData.totalAttemps}</div></td>
                         </tr>
                     </tbody>
                 </table>

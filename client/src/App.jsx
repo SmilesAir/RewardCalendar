@@ -8,6 +8,7 @@ const mainStore = require("./mainStore.js")
 const Summary = require("./summary.jsx")
 const Challenge = require("./challenge.jsx")
 const Calendar = require("./calendar.jsx")
+const Gallery = require("./gallery.jsx")
 const {googleDateToDate, getTodayGoogleDate, getData} = require("./utils.js")
 
 if (import.meta.hot) {
@@ -22,6 +23,7 @@ const App = observer(class App extends React.Component {
         super()
 
         this.onDataReady = []
+        this.onDataUpdated = []
 
         getData(`getData`).then((resp) => {
             runInAction(() => {
@@ -63,7 +65,7 @@ const App = observer(class App extends React.Component {
                 video: cellData[i][3],
                 diffFeel: cellData[i][4],
                 completed: cellData[i][5],
-                googleSheetRowIndex: i + 1
+                googleSheetRowIndex: i + 1,
             })
         }
 
@@ -107,12 +109,14 @@ const App = observer(class App extends React.Component {
     render() {
         return (
             <div className="topContainer">
-                <h2>{mainStore.name}</h2>
+                <div className="name">{mainStore.name}</div>
                 <div className="contentContainer">
                     <Summary onDataReadyDelegate={this.onDataReady}/>
-                    <Challenge onDataReadyDelegate={this.onDataReady}/>
+                    <Challenge onDataReadyDelegate={this.onDataReady} onDataUpdatedDelegate={this.onDataUpdated}/>
                     <Calendar onDataReadyDelegate={this.onDataReady}/>
+                    <div className={"gallerySpacer " + (mainStore.galleryCount > 0 ? "" : "hide")}/>
                 </div>
+                <Gallery onDataReadyDelegate={this.onDataReady} onDataUpdatedDelegate={this.onDataUpdated}/>
             </div>
         )
     }

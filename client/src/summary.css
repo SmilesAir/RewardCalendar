@@ -1,31 +1,50 @@
 
-.streakValues {
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
-    font-size: 2em;
-}
+.summaryContainer {
+    .streakValues {
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        font-size: 2em;
+    }
 
-.meter {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    padding: 3px;
-    font-size: 1.25em;
+    table {
+        width: 100%;
+    }
 
-    .barsContainer {
-        border: 2px solid;
-        border-radius: 5px;
-        flex-grow: 1;
-
-        .meterBar {
-            color: gray;
+    .statsContainer {
+        tr {
             display: flex;
             flex-direction: row;
-            justify-content: center;
+            justify-content: space-evenly;
+            width: 100%;
+
+            td, th {
+                flex-grow: 1;
+            }
+        }
+    }
+
+    .meter {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        padding: 3px;
+        font-size: 1.25em;
+
+        .barsContainer {
             border: 2px solid;
-            border-color: gray;
-            border-radius: 3px;
+            border-radius: 5px;
+            flex-grow: 1;
+
+            .meterBar {
+                color: gray;
+                display: flex;
+                flex-direction: row;
+                justify-content: center;
+                border: 2px solid;
+                border-color: gray;
+                border-radius: 3px;
+            }
         }
     }
 }

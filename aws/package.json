@@ -3,8 +3,9 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "deploy": "npm i && sls deploy",
-    "deploy:production": "npm i && sls deploy --stage production"
+    "build": "cd ..\\client && npm run build",
+    "deploy": "npm run build && npm i && sls deploy",
+    "deploy:production": "npm run build && npm i && sls deploy --stage production"
   },
   "devDependencies": {
     "fullstack-serverless": "^0.8.0"

@@ -37,6 +37,10 @@
             flex-direction: row;
             font-size: 2em;
 
+            .feelLabel {
+                margin-right: .5em;
+            }
+
             .starContainer {
                 flex-grow: 1;
                 display: flex;
@@ -71,6 +75,16 @@
             input[type=checkbox] {
                 transform: scale(2);
             }
+
+            .completed {
+                margin-right: .5em;
+            }
         }
+    }
+
+    .particle {
+        position: absolute;
+        z-index: 99;
+        pointer-events: none;
     }
 }

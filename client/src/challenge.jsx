@@ -7,11 +7,18 @@ import "./challenge.css"
 const mainStore = require("./mainStore.js")
 const {getTodayGoogleDate, pad, postData, getChallengeData} = require("./utils.js")
 
+const majkaThumbsUp2 = require("./assets/MajkaThumbsUp2.png")
+
 const Challenge = observer(class Challenge extends React.Component {
     constructor(props) {
         super(props)
 
         props.onDataReadyDelegate.push(() => this.onDataReady())
+        this.onDataUpdatedDelegate = props.onDataUpdatedDelegate
+
+        this.state = {
+            particles: []
+        }
 
         setInterval(() => {
             this.setState({})
@@ -48,17 +55,30 @@ const Challenge = observer(class Challenge extends React.Component {
     }
 
     getVideo() {
+        let videoElement = <div className="noVideoMessage">No Video Example Available</div>
+        let videoId = getChallengeData().video
+        if (videoId) {
+            videoElement = <iframe src={`https://drive.google.com/file/d/${videoId}/preview`} width="700" height="390" allow="autoplay"></iframe>
+        }
         return (
             <div className="video">
-                <div className="noVideoMessage">No Video Example Available</div>
+                {videoElement}
             </div>
         )
     }
 
-    onCompletedChanged() {
+    onCompletedChanged(e) {
         runInAction(() => {
             let challengeData = getChallengeData()
             challengeData.completed = !challengeData.completed
+
+            if (challengeData.completed) {
+                this.addParticle({x: 300, y: 300})
+            }
+
+            for (let func of this.onDataUpdatedDelegate) {
+                func()
+            }
 
             postData(`setCompleted/${challengeData.googleSheetRowIndex}/completed/${challengeData.completed ? 1 : 0}`, undefined).catch((error) => {
                 console.error(error)
@@ -66,13 +86,18 @@ const Challenge = observer(class Challenge extends React.Component {
         })
     }
 
-    onStarClick(stars) {
+    onStarClick(e, stars) {
         runInAction(() => {
             let challengeData = getChallengeData()
             if (stars === challengeData.diffFeel) {
                 challengeData.diffFeel = 0
             } else {
                 challengeData.diffFeel = stars
+                this.addParticle({x: e.clientX, y: e.clientY})
+            }
+
+            for (let func of this.onDataUpdatedDelegate) {
+                func()
             }
 
             postData(`setDiffFeel/${challengeData.googleSheetRowIndex}/feel/${challengeData.diffFeel}`, undefined).catch((error) => {
@@ -87,21 +112,74 @@ const Challenge = observer(class Challenge extends React.Component {
         for (let i = 0; i < 5; ++i) {
             let selected = i < challengeData.diffFeel
             stars.push(
-                <div key={i} className={`star ${selected ? "starSelected" : ""}`} onClick={() => this.onStarClick(i + 1)}>{i + 1}</div>
+                <div key={i} className={`star ${selected ? "starSelected" : ""}`} onClick={(e) => this.onStarClick(e, i + 1)}>{i + 1}</div>
             )
         }
         return (
             <div className="feedback">
                 <div className="feelContainer">
-                    <div>Diff Feel</div>
+                    <div className="feelLabel">Diff Feel</div>
                     <div className="starContainer">
                         {stars}
                     </div>
                 </div>
                 <div className="completionContainer">
                     <div className="completed">Completed?</div>
-                    <input type="checkbox" checked={challengeData.completed} onChange={() => this.onCompletedChanged()}/>
+                    <input type="checkbox" checked={challengeData.completed} onChange={(e) => this.onCompletedChanged(e)}/>
                 </div>
+            </div>
+        )
+    }
+
+    addParticle(pos) {
+        this.state.particles.push({
+            position: pos,
+            velocity: {
+                x: Math.random() * 400 - 200,
+                y: -Math.random() * 800
+            },
+            lifetime: 0,
+            maxLifetime: 2,
+            scale: 0
+        })
+        this.setState(this.state)
+
+        const deltaSeconds = 16 / 1000
+        if (this.particleUpdateHandle === undefined) {
+            this.particleUpdateHandle = setInterval(() => {
+                for (let part of this.state.particles) {
+                    part.position.x += part.velocity.x * deltaSeconds
+                    part.position.y += part.velocity.y * deltaSeconds
+                    part.scale = Math.min(1.5, part.scale + 1.5 * deltaSeconds)
+                    part.lifetime += deltaSeconds
+                }
+
+                let newParticles = this.state.particles.filter((part) => part.lifetime < part.maxLifetime)
+
+                if (newParticles.length === 0) {
+                    clearInterval(this.particleUpdateHandle)
+                    this.particleUpdateHandle = undefined
+                }
+
+                this.setState({particles: newParticles})
+            }, 16)
+        }
+    }
+
+    getParticles() {
+        let particleElements = this.state.particles.map((part) => {
+            let style = {
+                top: part.position.y + "px",
+                left: part.position.x + "px",
+                transform: `scale(${part.scale})`
+            }
+            return (
+                <img key={part.position.x} className="particle" style={style} src={majkaThumbsUp2} />
+            )
+        })
+        return (
+            <div>
+                {particleElements}
             </div>
         )
     }
@@ -116,6 +194,7 @@ const Challenge = observer(class Challenge extends React.Component {
                 {this.getMove()}
                 {this.getVideo()}
                 {this.getFeedback()}
+                {this.getParticles()}
             </div>
         )
     }

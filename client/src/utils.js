@@ -1,13 +1,14 @@
-import moment from "moment"
+const moment = require("moment-timezone")
 
 const mainStore = require("./mainStore.js")
 
 const utils = {}
 
+//const epoch = "1900-1-1"
+const epoch = "1899-12-30"
+
 utils.googleDateToDate = function(googleDate) {
-    let newDate = new Date("1899-12-31")
-    newDate.setDate(newDate.getDate() + googleDate)
-    return newDate
+    return moment(epoch).add(googleDate, "days").format()
 }
 
 utils.dateToGoogleDate = function(date) {
@@ -15,7 +16,7 @@ utils.dateToGoogleDate = function(date) {
 }
 
 utils.getTodayGoogleDate = function() {
-    return moment().diff(new Date("1899-12-31"), "days")
+    return moment().diff(moment(epoch), "days")
 }
 
 utils.pad = function(num) {

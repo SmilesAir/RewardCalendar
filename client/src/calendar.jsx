@@ -35,7 +35,7 @@ const Calendar = observer(class Calendar extends React.Component {
     renderEventContent(eventInfo) {
         return (
           <div className="event" onClick={() => this.onClickEvent(eventInfo.event)}>
-            <div>{eventInfo.event.title}</div>
+            <div className="title">{eventInfo.event.title}</div>
           </div>
         )
     }
